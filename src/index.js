@@ -1,27 +1,40 @@
 import dotenv from 'dotenv'
 import Twitter from 'twitter'
 import express from "express"
+import SpotifyWebApi from "spotify-web-api-node"
+ 
 const server = express();
 const dot_env = dotenv.config()
 
-const atkn = process.env.ACCESS_TOKEN;
-const ascrt = process.env.ACCESS_SECRET;
-const apik = process.env.API_KEY;
-const apisk = process.env.API_SECRET_KEY;
-
 var client = new Twitter({
-  consumer_key: apik,
-  consumer_secret: apisk,
-  access_token_key: atkn,
-  access_token_secret: ascrt
+  consumer_key: process.env.API_KEY,
+  consumer_secret: process.env.API_SECRET_KEY,
+  access_token_key: process.env.ACCESS_TOKEN,
+  access_token_secret: process.env.ACCESS_SECRET
 });
 
-var params = {screen_name: 'elBotdeJesi'};
+var spotifyApi = new SpotifyWebApi({
+    clientId: process.env.SPOTIFY_ID,
+    clientSecret: process.env.SPOTIFY_SECRET
+  });
+spotifyApi.setAccessToken(process.env.SPOTIFY_TOKEN);
 
-client.get('statuses/user_timeline', params, function(error, tweets, response) {
-  if (!error) {
-    console.log(tweets);
-  }else{
-      console.log(error);
-  }
-});
+
+spotifyApi.getMyCurrentPlaybackState()
+  .then(function(data) {
+    // Output items
+    if (data.body && data.body.is_playing) {
+      console.log(data.body.item.name);
+      console.log(data.body.item.artists[0].name);
+    } else {
+      console.log("User is not playing anything, or doing so in private.");
+    }
+  }, function(err) {
+    console.log('Something went wrong!', err);
+  });
+// var params = {screen_name: 'elBotdeJesi'};
+// client.post('statuses/update', {status: 'I am a tweeting from js'}, function(error, tweet, response) {
+//     if (!error) {
+//       console.log(tweet);
+//     }
+//   });
