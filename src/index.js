@@ -31,20 +31,37 @@ spotifyApi.setAccessToken(process.env.SPOTIFY_TOKEN);
 // var link = null
 
 spotifyApi.getMyCurrentPlaybackState()
-  .then(function(data) {
+  .then(async function(data) {
     // Output items
+    
+    const saved_tracks = await spotifyApi.getMySavedTracks({
+      limit: 50,
+    })
+    console.log(saved_tracks.body);
+
     if (data.body && data.body.is_playing) {
       
-      console.log(data.body.item.name);
-      console.log(data.body.item.artists[0].name);
-      console.log(data.body.item.external_urls.spotify);
-      console.log(data.body);
+      // console.log(data.body.item.name);
+      // console.log(data.body.item.artists[0].name);
+      // console.log(data.body.item.external_urls.spotify);
+      // console.log(data.body);
       
       var title = data.body.item.name;
       var artist = data.body.item.artists[0].name;
       var link = data.body.item.external_urls.spotify;
 
-      var tw = "Jesi is currently playing " + title + " by " + artist + "\n\n" + link
+
+      // console.log(saved_tracks.body.items);
+      var tw = "Jesi is currently playing " + title + " by " + artist;
+
+      for(var i = 0; i<saved_tracks.body.items.length; i++){
+        if(data.body.id == saved_tracks.body.items[i].track.id){
+          tw += ", and he loves it!"
+          console.log("and he loves it!");
+        }
+      }
+      tw += "\n\n" + link
+
       client.post('statuses/update', {status: tw}, function(error, tweet, response) {
         if (!error) {
             console.log(tweet);
